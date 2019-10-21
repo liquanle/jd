@@ -19,3 +19,9 @@
 .usermotto {
   margin-top: 200px;
 }
+
+.lql
+{
+  background-color: red;
+  color: blue;
+}
