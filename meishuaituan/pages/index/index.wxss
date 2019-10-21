@@ -24,4 +24,5 @@
 {
   background-color: red;
   color: blue;
+  margin: 5rpx;
 }
