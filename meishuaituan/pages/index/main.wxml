@@ -1,0 +1,25 @@
+<!--pages/index/main.wxml-->
+<!--index.wxml-->
+<text class='iconfont icon-home' style='color:#7F8389;font-size:60rpx;'></text>
+<view class="container">
+  <view class="flex_wrp">
+      <view class="flex-wrp" style="flex-direction:column;height: 100%;">
+        <image class="image_main" src="http://yd.zhqycg.com/skins/demo/images/bushu_1.gif"></image>
+        <text class="text_main">{{tiptext}}</text>
+        <view style="margin:20rpx 10rpx;">
+          <view class="flex-wrp" style="margin:20rpx 0rpx;">
+            <text class="userinfo-nickname">* 会员编号</text>
+            <view class="weui-cell weui-cell_input">
+              <input focus type = "number" class="input_main" placeholder=" " bindinput= "userIDInput"></input>
+            </view>
+          </view>
+          <view class="flex">
+            <text class="userinfo-nickname">* 本次跑量 /KM</text>
+            <input type = "digit" class="input_main" placeholder=" "  bindinput= "userMileInput"></input>
+          </view>
+        </view>
+        <button class="button_main" hover-class = "button_main_hover" bindtap="btnCommit">提交</button>
+      </view>
+  </view>
+  <view class="blank"></view>
+</view>
