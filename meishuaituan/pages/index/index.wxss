@@ -26,3 +26,8 @@
   color: blue;
   margin: 5rpx;
 }
+
+.bluesky
+{
+	margin: 5rpx 6rpx;
+}
