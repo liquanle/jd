@@ -25,3 +25,7 @@
 	background-color: red;
 }
 
+.new
+{
+	color: red;
+}
