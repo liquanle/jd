@@ -70,6 +70,23 @@ Page({
 
   btnCommit:function()
   {
+    //增加访问request接口
+    let app = getApp()
+    
+    wx.showLoading({ title: '加载中' })
+
+    app.request(`http://localhost:8080/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
+      .then(res => {
+        console.log("res", res)
+        if (res.subjects.length) {
+          
+        }
+      }).catch(err => {
+        console.error(err)
+      }).finally(() => {
+        wx.hideLoading()
+      })
+
     wx.showToast({
       title: this.data.userID + '号成功打卡' + this.data.userMile +'公里！',
       icon: 'none',
