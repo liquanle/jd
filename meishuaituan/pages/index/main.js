@@ -75,12 +75,10 @@ Page({
     
     wx.showLoading({ title: '加载中' })
 
-    app.request(`http://localhost:8080/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
+    app.request(`http://jd177.com:8080/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
       .then(res => {
         console.log("res", res)
-        if (res.subjects.length) {
-          
-        }
+
       }).catch(err => {
         console.error(err)
       }).finally(() => {
