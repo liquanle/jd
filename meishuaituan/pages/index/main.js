@@ -75,7 +75,7 @@ Page({
     
     wx.showLoading({ title: '加载中' })
 
-    app.request(`http://jd177.com:8080/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
+    app.request(`http://liquanle.com:8099/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
       .then(res => {
         console.log("res", res)
 
