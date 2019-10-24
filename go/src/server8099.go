@@ -21,11 +21,19 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
     fmt.Println("path", r.URL.Path)
     fmt.Println("scheme", r.URL.Scheme)
     fmt.Println(r.Form["url_long"])
+	count := 0
+	strOut := ""
     for k, v := range r.Form {
         fmt.Println("key:", k)
         fmt.Println("val:", strings.Join(v, ""))
+		
+		if count == 0 {
+			strOut = fmt.Sprintf("%v %v", v, "打卡")
+		}else{
+			strOut = fmt.Sprintf("%v %v %v", strOut, v, "!\n")
+		}
     }
-    fmt.Fprintf(w, "Hello astaxie!") //这个写入到w的是输出到客户端的
+    fmt.Fprintf(w, strOut) //这个写入到w的是输出到客户端的
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
