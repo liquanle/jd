@@ -5,13 +5,19 @@ import (
     "net/http"
 	"html/template"
     "strings"
+	"time"
     "log"
 )
 
 func sayhelloName(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()  //解析参数，默认是不会解析的
-	fmt.Println("————————————————————————————————————————！")
-    fmt.Println(r.Form)  //这些信息是输出到服务器端的打印信息
+	var goos = time.Now().Format("2006-01-02 15:04:05")
+    
+	fmt.Printf("——————————————————%s————————————————————\n", goos)
+	fmt.Printf("the current time:%s \n", goos)
+	fmt.Println("method:", r.Method) //获取请求的方法
+
+    //fmt.Println(r.Form)  //这些信息是输出到服务器端的打印信息
     fmt.Println("path", r.URL.Path)
     fmt.Println("scheme", r.URL.Scheme)
     fmt.Println(r.Form["url_long"])
@@ -19,7 +25,7 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
         fmt.Println("key:", k)
         fmt.Println("val:", strings.Join(v, ""))
     }
-    fmt.Fprintf(w, "Hello astaxie!") //这个写入到w的是输出到客户端的
+    fmt.Fprintf(w, "Hello everyone!") //这个写入到w的是输出到客户端的
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
@@ -37,9 +43,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fmt.Println("开始运行！")
-    //http.HandleFunc("/", sayhelloName) //设置访问的路由
-	http.HandleFunc("/login", login)   //设置登录路由
-    err := http.ListenAndServe(":8090", nil) //设置监听的端口
+    http.HandleFunc("/", sayhelloName) //设置访问的路由
+	//http.HandleFunc("/login", login)   //设置登录路由
+    err := http.ListenAndServe(":8080", nil) //设置监听的端口
     if err != nil {
         log.Fatal("ListenAndServe: ", err)
     }
