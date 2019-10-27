@@ -30,8 +30,9 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 		if count == 0 {
 			strOut = fmt.Sprintf("%v %v", v, "打卡")
 		}else{
-			strOut = fmt.Sprintf("%v %v %v", strOut, v, "!\n")
+			strOut = fmt.Sprintf("%v %v %v", strOut, v, "公里!\n")
 		}
+		count++
     }
     fmt.Fprintf(w, strOut) //这个写入到w的是输出到客户端的
 }
