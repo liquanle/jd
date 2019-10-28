@@ -76,7 +76,10 @@ Page({
     wx.showLoading({ title: '加载中' })
 
     app.request(`http://liquanle.com:8099/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
+<<<<<<< HEAD
     //app.request(`http://jd177.com:8080/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
+=======
+>>>>>>> 279377104914d4c93565ca50ab75bec345fa4ea4
       .then(res => {
         console.log("res", res)
 
