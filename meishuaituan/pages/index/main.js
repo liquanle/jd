@@ -2,6 +2,14 @@
 //获取应用实例
 const app = getApp()
 
+function json2Form(json) {
+  var str = [];
+  for (var p in json) {
+    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(json[p]));
+  }
+  return str.join("&");
+}
+
 Page({
   data: {
     userID:{},
@@ -72,27 +80,34 @@ Page({
   {
     //增加访问request接口
     let app = getApp()
-    
     wx.showLoading({ title: '加载中' })
-
-    app.request(`http://liquanle.com:8099/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
-<<<<<<< HEAD
-    //app.request(`http://jd177.com:8080/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
-=======
->>>>>>> 279377104914d4c93565ca50ab75bec345fa4ea4
+    //GET方法
+    /*app.request(`https://ziweitec.com/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
       .then(res => {
         console.log("res", res)
-
       }).catch(err => {
         console.error(err)
       }).finally(() => {
         wx.hideLoading()
-      })
+      })*/
+    //POST方式
+    let dataval = {
+      no: this.data.userID,
+      mile: this.data.userMile
+    };
+    wx.request({
+      url: 'https://ziweitec.com/liquanle',
+      method: 'POST',
+      data: dataval,
+      header: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+    })
 
     wx.showToast({
       title: this.data.userID + '号成功打卡' + this.data.userMile +'公里！',
       icon: 'none',
-      duration: 3000//持续的时间
+      duration: 6000//持续的时间
     })
   }
 })

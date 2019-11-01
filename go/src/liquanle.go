@@ -43,9 +43,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fmt.Println("开始运行！")
-<<<<<<< HEAD
     http.HandleFunc("/", sayhelloName) //设置访问的路由
-=======
     http.HandleFunc("/liquanle", sayhelloName) //设置访问的路由
 >>>>>>> 279377104914d4c93565ca50ab75bec345fa4ea4
 	//http.HandleFunc("/login", login)   //设置登录路由
