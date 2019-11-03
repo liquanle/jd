@@ -10,7 +10,7 @@
           <view class="flex-wrp" style="margin:20rpx 0rpx;">
             <text class="userinfo-nickname">* 会员编号</text>
             <view class="weui-cell weui-cell_input">
-              <input focus type = "number" class="input_main" placeholder=" " bindinput= "userIDInput"></input>
+              <input focus type = "number" class="input_main" placeholder=" " bindinput= "userIDInput" value = "{{userID}}"></input>
             </view>
           </view>
           <view class="flex">

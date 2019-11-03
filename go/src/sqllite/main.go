@@ -4,19 +4,33 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
 
-	strHitCard := "CREATE TABLE `runRec` ( " +
+	// strHitCard := "CREATE TABLE `runRec` ( " +
+	// 	"`uid` INTEGER PRIMARY KEY AUTOINCREMENT," +
+	// 	"`会员` VARCHAR(64) NULL," +
+	// 	"`微信号` VARCHAR(64) NULL," +
+	// 	"`距离` VARCHAR(64) NULL," +
+	// 	"`时间` DATE NULL" +
+	// 	");"
+	strRunRec := "CREATE TABLE `runRec` ( " +
 		"`uid` INTEGER PRIMARY KEY AUTOINCREMENT," +
-		"`会员` VARCHAR(64) NULL," +
-		"`微信号` VARCHAR(64) NULL," +
-		"`距离` VARCHAR(64) NULL," +
-		"`时间` DATE NULL" +
+		"`nickname` VARCHAR(64) NULL," +
+		"`userID` VARCHAR(64) NULL," +
+		"`openid` VARCHAR(64) NULL," +
+		"`mile` VARCHAR(64) NULL," +
+		"`time` DATE NULL," +
+		"`image` VARCHAR(64) NULL" +
 		");"
+
+	gDb, err := sql.Open("sqlite3", "./run.db")
+	res, err := gDb.Exec(strRunRec)
+	checkErr(err)
 
 	strInfo := "CREATE TABLE `userinfo` ( " +
 		"`uid` INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -37,13 +51,19 @@ func main() {
 	db.Exec(strInfo2)
 	checkErr(err)
 
+	strExitTable := "SELECT count(*) from sqlite_master where type='table' and name = ?"
+	stmt, err := db.Prepare(strExitTable)
+	res, err = stmt.Exec("userinfo")
+	fmt.Println(res)
+
 	//插入数据
-	stmt, err := db.Prepare("INSERT INTO userinfo(username, departname, created) values(?,?,?)")
-	checkErr(err)
+	// stmt, err := db.Prepare("INSERT INTO userinfo(username, departname, created) values(?,?,?)")
+	// checkErr(err)
 
 	var curTime = time.Now().Format("2006-01-02 15:04:05")
-	res, err := stmt.Exec("李全乐", "研发部门", curTime)
-	checkErr(err)
+	// res, err := stmt.Exec("李全乐", "研发部门", curTime)
+	// checkErr(err)
+	fmt.Println(curTime)
 
 	id, err := res.LastInsertId()
 	checkErr(err)

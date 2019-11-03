@@ -12,8 +12,10 @@ function json2Form(json) {
 
 Page({
   data: {
-    userID:{},
+    userID:"",
     userMile:{},
+    nickname:{},
+    image:{},
     tiptext: '请跑团的每位会员成员填写会员编号及日总跑量，每天12点前完成一日跑量填写，感谢配合！',
     userInfo: {},
     hasUserInfo: false,
@@ -29,6 +31,7 @@ Page({
     if (app.globalData.userInfo) {
       this.setData({
         userInfo: app.globalData.userInfo,
+        openid:app.globalData.openid,
         hasUserInfo: true
       })
     } else if (this.data.canIUse) {
@@ -51,7 +54,20 @@ Page({
           })
         }
       })
-    }
+    } 
+
+    //初始化会员编号
+
+    var strQueryUrL = `https://ziweitec.com/queryMember?openid=${app.globalData.openid}`
+    wx.request({
+      url: strQueryUrL,
+      success: res => {
+        //this.globalData.openid = res.data.openid
+        this.setData({
+          userID: res.data
+        })
+      }
+    })
   },
   getUserInfo: function (e) {
     console.log(e)
@@ -91,9 +107,25 @@ Page({
         wx.hideLoading()
       })*/
     //POST方式
+
+    if (app.globalData.userInfo == null){
+      this.setData({
+        nickname : "unknown",
+        image : "unknown"
+      })
+    }else{
+      this.setData({
+        nickname: app.globalData.userInfo.nickName,
+        image: app.globalData.userInfo.avatarUrl
+      })
+    }
+
     let dataval = {
-      no: this.data.userID,
-      mile: this.data.userMile
+      userID: this.data.userID,
+      mile: this.data.userMile,
+      openid: app.globalData.openid,
+      nickname: this.data.nickname,
+      image: this.data.image
     };
     wx.request({
       url: 'https://ziweitec.com/liquanle',

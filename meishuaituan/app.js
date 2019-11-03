@@ -12,6 +12,22 @@ App(Object.assign(app,{
     wx.login({
       success: res => {
         // 发送 res.code 到后台换取 openId, sessionKey, unionId
+     
+        var APPID = 'wxa1b1f1fe3051de10'
+        var secret = '7b14195be09a4db9a8ab38afd4aa9fd7'
+
+        var strUrl = `https://ziweitec.com/getOpenid?appid=${APPID}&secret=${secret}&js_code=${res.code}&grant_type=authorization_code`
+        wx.request({
+          url: strUrl,
+          success: res=> {
+            this.globalData.openid = res.data.openid
+            console.log(res.data.openid)
+            console.log("wx.login")
+            wx.navigateTo({
+              url: './main',
+            })
+          }
+        })
       }
     })
     // 获取用户信息
@@ -28,14 +44,43 @@ App(Object.assign(app,{
               // 所以此处加入 callback 以防止这种情况
               if (this.userInfoReadyCallback) {
                 this.userInfoReadyCallback(res)
+                
               }
+            },
+            fail: res => {
+              console.info("getUserInfo", res)
             }
           })
+        }else{
+          // wx.showModal({
+          //   title: '用户未授权',
+          //   content: '拒绝授权将不能体验小程序完整功能，点击确定开启授权',
+          //   success: (res) => {
+          //     console.log(res)
+          //     if (res.confirm) {
+          //       wx.navigateTo({
+          //         url: './index',
+          //       })
+          //       wx.authorize({
+          //         scope: 'scope.userInfo',
+          //         scope: 'scope.userLocation'
+          //       })
+          //       //wx.openSetting({})
+          //     }
+          //   }
+          // })
         }
+      },
+      fail: res => {
+        console.info("getSetting", res)
+      },
+      complete: res => {
+        console.info("getsetting_complete", res)
       }
     })
   },
   globalData: {
-    userInfo: null
+    userInfo: null,
+    openid:''
   }
 }))
