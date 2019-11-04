@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/index/index",
     "pages/index/main",
+    "pages/index/index",
     "pages/logs/logs"
   ],
   "window": {
@@ -9,11 +9,6 @@
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "美帅团打卡",
     "navigationBarTextStyle": "black"
-  },
-  "permission": {
-    "scope.userInfo":{
-      "desc": "使管理员能核对信息！"
-    }
   },
   "sitemapLocation": "sitemap.json"
 }

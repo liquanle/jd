@@ -4,9 +4,9 @@ let app = require("./sim.js/index.js")
 App(Object.assign(app,{
   onLaunch: function () {
     // 展示本地存储能力
-    var logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
+    // var logs = wx.getStorageSync('logs') || []
+    // logs.unshift(Date.now())
+    // wx.setStorageSync('logs', logs)
 
     // 登录
     wx.login({
@@ -22,9 +22,20 @@ App(Object.assign(app,{
           success: res=> {
             this.globalData.openid = res.data.openid
             console.log(res.data.openid)
-            console.log("wx.login")
-            wx.navigateTo({
-              url: './main',
+
+            let pages = getCurrentPages();
+            let prevPage = pages[pages.length - 1];  //上一个页面
+            console.log("当前页面路由：" + prevPage.route)
+            //初始化会员编号
+            var strQueryUrL = `https://ziweitec.com/queryMember?openid=${app.globalData.openid}`
+            wx.request({
+              url: strQueryUrL,
+              success: res => {
+                prevPage.setData({
+                  userID: res.data,
+                  userMile: ''
+                })
+              }
             })
           }
         })
@@ -44,7 +55,6 @@ App(Object.assign(app,{
               // 所以此处加入 callback 以防止这种情况
               if (this.userInfoReadyCallback) {
                 this.userInfoReadyCallback(res)
-                
               }
             },
             fail: res => {

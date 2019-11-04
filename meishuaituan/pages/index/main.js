@@ -12,7 +12,7 @@ function json2Form(json) {
 
 Page({
   data: {
-    userID:"",
+    userID:'',
     userMile:{},
     nickname:{},
     image:{},
@@ -55,19 +55,28 @@ Page({
         }
       })
     } 
-
+  },
+  onShow: function () {
     //初始化会员编号
-
     var strQueryUrL = `https://ziweitec.com/queryMember?openid=${app.globalData.openid}`
     wx.request({
       url: strQueryUrL,
       success: res => {
         //this.globalData.openid = res.data.openid
         this.setData({
-          userID: res.data
+          userID: res.data,
+          userMile:''
         })
       }
     })
+  },
+  onHide: function () {
+    console.log("onHide: function () ")
+    this.setData({
+      userID:'',
+      userMile: ''
+    })
+
   },
   getUserInfo: function (e) {
     console.log(e)
