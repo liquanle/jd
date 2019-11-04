@@ -46,7 +46,7 @@ func main() {
 		"PRIMARY KEY (`uid`)" +
 		");"
 
-	db, err := sql.Open("sqlite3", "./daka.db")
+	db, err := sql.Open("sqlite3", "./run.db")
 	db.Exec(strInfo)
 	db.Exec(strInfo2)
 	checkErr(err)
@@ -55,6 +55,20 @@ func main() {
 	stmt, err := db.Prepare(strExitTable)
 	res, err = stmt.Exec("userinfo")
 	fmt.Println(res)
+
+	checkErr(err)
+
+	//先获取值
+	year, mon, day := time.Now().Date()
+	//hour, min, sec := now.Clock()
+
+	dtSmall := fmt.Sprintf("%d-%d-%d 00:00:00", year, mon, day)
+	dtBig := fmt.Sprintf("%d-%d-%d 00:00:00", year, mon, day+1)
+
+	//先判断当天是否已打过卡
+	//select * from runRec where time > '2019-11-03 00:00:00' and time < '2019-11-05 00:00:00' and userID = '477'
+	userID := 477
+	preSql := fmt.Sprintf("select * from runRec where time > '%s' and time < '%s' and userID = '%s'", dtSmall, dtBig, userID)
 
 	//插入数据
 	// stmt, err := db.Prepare("INSERT INTO userinfo(username, departname, created) values(?,?,?)")
@@ -82,20 +96,13 @@ func main() {
 	fmt.Println(affect)
 
 	//查询数据
-	rows, err := db.Query("SELECT * FROM userinfo")
+	rows, err := db.Query(preSql)
 	checkErr(err)
 
-	for rows.Next() {
-		var uid int
-		var username string
-		var department string
-		var created string
-		err = rows.Scan(&uid, &username, &department, &created)
-		checkErr(err)
-		fmt.Println(uid)
-		fmt.Println(username)
-		fmt.Println(department)
-		fmt.Println(created)
+	if rows.Next() {
+		rows.Close()
+		db.Close()
+		return
 	}
 
 	//删除数据

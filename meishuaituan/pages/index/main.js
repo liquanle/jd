@@ -13,8 +13,9 @@ function json2Form(json) {
 Page({
   data: {
     userID:'',
-    userMile:{},
-    nickname:{},
+    userIdDisable:false,
+    userMile:'',
+    nickname:'',
     image:{},
     tiptext: '请跑团的每位会员成员填写会员编号及日总跑量，每天12点前完成一日跑量填写，感谢配合！',
     userInfo: {},
@@ -58,14 +59,18 @@ Page({
   },
   onShow: function () {
     //初始化会员编号
+    if (app.globalData.openid == ""){
+      return;
+    }
+    
     var strQueryUrL = `https://ziweitec.com/queryMember?openid=${app.globalData.openid}`
     wx.request({
       url: strQueryUrL,
       success: res => {
-        //this.globalData.openid = res.data.openid
         this.setData({
           userID: res.data,
-          userMile:''
+          userMile:'',
+          userIdDisable: res.data ? true : false
         })
       }
     })
@@ -87,7 +92,7 @@ Page({
     })
   },
 
-  //获取用户输入的用户名
+  //获取用户输入的用户ID
   userIDInput: function (e) {
     this.setData({
       userID: e.detail.value
@@ -103,11 +108,35 @@ Page({
 
   btnCommit:function()
   {
+    if (this.data.userID.length == 0 || this.data.userMile.length == 0){
+      wx.showToast({
+        title: '错误，会员编号或本次跑量为空！',
+        icon: 'none',
+        duration: 3000//持续的时间
+      })
+      return
+    }
+
+    var nMile = parseFloat(this.data.userMile);
+    if (nMile < 3.0)
+    {
+      wx.showToast({
+        title: '低于3公里不能打卡！',
+        icon: 'none',
+        duration: 2000
+      })
+
+      this.setData({
+        userMile:''
+      })
+      return
+    }
+
     //增加访问request接口
     let app = getApp()
     wx.showLoading({ title: '加载中' })
     //GET方法
-    /*app.request(`https://ziweitec.com/liquanle?no=${this.data.userID}&mile=${this.data.userMile}`)
+    /*app.request(`https://ziweitec.com/daka?no=${this.data.userID}&mile=${this.data.userMile}`)
       .then(res => {
         console.log("res", res)
       }).catch(err => {
@@ -137,18 +166,36 @@ Page({
       image: this.data.image
     };
     wx.request({
-      url: 'https://ziweitec.com/liquanle',
+      url: 'https://ziweitec.com/daka',
       method: 'POST',
       data: dataval,
       header: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
+      success: res => {
+        if (res.data === "today_is_exist"){
+          wx.showToast({
+            title: this.data.userID + '号成功失败，今天已经打过卡了！',
+            icon: 'none',
+            duration: 6000//持续的时间
+          });
+          return
+        }else{
+          wx.showToast({
+            title: this.data.userID + '号成功打卡' + this.data.userMile + '公里！',
+            icon: 'none',
+            duration: 6000//持续的时间
+          })
+          this.setData({
+            userIdDisable: true,
+            userMile: ''
+          })
+        }
+        
+        
+      }
     })
 
-    wx.showToast({
-      title: this.data.userID + '号成功打卡' + this.data.userMile +'公里！',
-      icon: 'none',
-      duration: 6000//持续的时间
-    })
+    
   }
 })

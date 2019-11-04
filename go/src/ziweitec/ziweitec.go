@@ -27,8 +27,38 @@ import (
 // 	resOpenIDs []resOpenID
 // }
 
+//从打卡记录中同步提取会员注册信息
+func addMember(db *sql.DB, userid, oid string) {
+	var curTIme = time.Now().Format("2006-01-02 15:04:05")
+
+	fmt.Printf("\n———————提取会员信息%s—————————\n", curTIme)
+	//查询数据
+	strQueryWhere := fmt.Sprintf("SELECT userID FROM member where openid = '%s'", oid)
+	fmt.Println("strQueryWhere = ", strQueryWhere)
+	rows, err := db.Query(strQueryWhere)
+	checkErr(err)
+
+	if rows.Next() {
+		fmt.Println("记录已存在!")
+		rows.Close()
+		return
+	} else {
+		//插入数据
+		gStmt, err := db.Prepare("INSERT INTO member(userID, openid, time) values(?,?,?)")
+		checkErr(err)
+
+		var curTime = time.Now().Format("2006-01-02 15:04:05")
+
+		_, err = gStmt.Exec(userid, oid, curTime)
+		checkErr(err)
+		rows.Close()
+		gStmt.Close()
+		fmt.Printf("userid = %s\nopenid = %s\n", userid, oid)
+	}
+}
+
 //处理打卡信息
-func dakaservice(w http.ResponseWriter, r *http.Request) {
+func daka(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		fmt.Println("GET请求，返回")
 		return
@@ -36,14 +66,35 @@ func dakaservice(w http.ResponseWriter, r *http.Request) {
 		//fmt.Println("POST请求，返回")
 		r.ParseForm() //解析参数，默认是不会解析的
 
+		var curTIme = time.Now().Format("2006-01-02 15:04:05")
+		fmt.Printf("\n———————打卡%s—————————\n", curTIme)
 		gDb, err := sql.Open("sqlite3", "./run.db")
 		checkErr(err)
 
-		var curTIme = time.Now().Format("2006-01-02 15:04:05")
+		//先获取值
+		nickName, userID, openid, image, mile := r.Form.Get("nickname"), r.Form.Get("userID"), r.Form.Get("openid"), r.Form.Get("image"), r.Form.Get("mile")
 
-		fmt.Printf("————————————%s——————————————\n", curTIme)
-		//fmt.Printf("the current time:%s \n", curTIme)
-		//fmt.Println("method:", r.Method) //获取请求的方法
+		//先获取值
+		year, mon, day := time.Now().Date()
+		//hour, min, sec := now.Clock()
+
+		dtSml := fmt.Sprintf("%d-%02d-%02d 00:00:00", year, mon, day)
+		dtBig := fmt.Sprintf("%d-%02d-%02d 00:00:00", year, mon, day+1)
+
+		//先判断当天是否已打过卡
+		//select * from runRec where time > '2019-11-03 00:00:00' and time < '2019-11-05 00:00:00' and userID = '477'
+		preSql := fmt.Sprintf("select userID from runRec where time > '%s' and time < '%s' and userID = '%s'", dtSml, dtBig, userID)
+		fmt.Println(preSql)
+		rows, err := gDb.Query(preSql)
+		checkErr(err)
+
+		if rows.Next() {
+			rows.Close()
+			gDb.Close()
+			w.Write([]byte("today_is_exist"))
+			fmt.Println("今天已经打过卡了")
+			return
+		}
 
 		//插入数据
 		gStmt, err := gDb.Prepare("INSERT INTO runRec(nickname, userID, openid, mile, time, image) values(?,?,?,?,?,?)")
@@ -52,18 +103,14 @@ func dakaservice(w http.ResponseWriter, r *http.Request) {
 		//fmt.Println("gStmt 前")
 		var curTime = time.Now().Format("2006-01-02 15:04:05")
 		// res, err := gStmt.Exec("477", "wxno", "5", curTime)
-		nickName, userID, openid, image, mile := r.Form.Get("nickname"), r.Form.Get("userID"), r.Form.Get("openid"), r.Form.Get("image"), r.Form.Get("mile")
+
 		_, err = gStmt.Exec(nickName, userID, openid, mile, curTime, image)
 		checkErr(err)
-		// affect, err := res.RowsAffected()
-		// checkErr(err)
 
-		//fmt.Println(affect)
+		fmt.Printf("userid = %s\nnickname = %s\nopenid = %s\nimage = %s\nmile = %s\n", userID, nickName, openid, image, mile)
+		//从打卡记录中提取会员信息
+		addMember(gDb, userID, openid)
 
-		//strOut := fmt.Sprintf("%s hit %s mile!\n", userID, mile)
-		//fmt.Fprintf(w, strOut) //这个写入到w的是输出到客户端的
-		//fmt.Println(strOut)
-		fmt.Printf("userid = %s\nnickname = %s\nopenid = %s\nimage = %s\nmile = %s", userID, nickName, openid, image, mile)
 		gDb.Close()
 	}
 }
@@ -71,7 +118,7 @@ func dakaservice(w http.ResponseWriter, r *http.Request) {
 //查询会员信息
 func queryMember(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		fmt.Println("queryMember")
+		//fmt.Println("queryMember")
 		r.ParseForm() //解析参数，默认是不会解析的
 
 		gDb, err := sql.Open("sqlite3", "./run.db")
@@ -79,7 +126,7 @@ func queryMember(w http.ResponseWriter, r *http.Request) {
 
 		var curTIme = time.Now().Format("2006-01-02 15:04:05")
 
-		fmt.Printf("————————————%s——————————————\n", curTIme)
+		fmt.Printf("\n———————查询userID%s—————————\n", curTIme)
 		//查询数据
 		openid := r.Form.Get("openid")
 		fmt.Println("openid = ", openid)
@@ -130,6 +177,8 @@ func getOpenId(w http.ResponseWriter, r *http.Request) {
 		strJs_code := r.Form.Get("js_code")
 		strGrant_type := r.Form.Get("grant_type")
 
+		var curTIme = time.Now().Format("2006-01-02 15:04:05")
+		fmt.Printf("\n———————获取openid%s—————————\n", curTIme)
 		//fmt.Println(strAppID + "\n" + strSecret + "\n" + strJs_code + "\n" + strGrant_type)
 
 		client2 := &http.Client{}
@@ -161,7 +210,6 @@ func getOpenId(w http.ResponseWriter, r *http.Request) {
 		//请求的是登陆数据，那么执行登陆的逻辑判断
 		fmt.Println("username:", r.Form["username"])
 		fmt.Println("password:", r.Form["password"])
-
 	}
 }
 
@@ -170,10 +218,10 @@ func main() {
 	initFun()
 
 	fmt.Println("开始运行！")
-	http.HandleFunc("/", dakaservice)            //设置访问的路由
+	http.HandleFunc("/daka", daka)               //打卡处理逻辑
 	http.HandleFunc("/getOpenid", getOpenId)     //得到openID
 	http.HandleFunc("/queryMember", queryMember) //通过查询openid得到userID
-	//http.HandleFunc("/login", login)   //设置登录路由
+
 	//err := http.ListenAndServe(":8080", nil)
 	err := http.ListenAndServeTLS(":443", "2988657_ziweitec.com.pem", "2988657_ziweitec.com.key", nil)
 	if err != nil {

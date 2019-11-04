@@ -33,7 +33,8 @@ App(Object.assign(app,{
               success: res => {
                 prevPage.setData({
                   userID: res.data,
-                  userMile: ''
+                  userMile: '',
+                  userIdDisable: res.data ? true : false
                 })
               }
             })

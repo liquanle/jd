@@ -10,12 +10,12 @@
           <view class="flex-wrp" style="margin:20rpx 0rpx;">
             <text class="userinfo-nickname">* 会员编号</text>
             <view class="weui-cell weui-cell_input">
-              <input focus type = "number" class="input_main" placeholder=" " bindinput= "userIDInput" value = "{{userID}}"></input>
+              <input focus type = "number" class="input_main" placeholder=" " bindinput= "userIDInput" disabled = '{{userIdDisable}}' value = '{{userID}}'></input>
             </view>
           </view>
           <view class="flex">
             <text class="userinfo-nickname">* 本次跑量 /KM</text>
-            <input type = "digit" class="input_main" placeholder=" "  bindinput= "userMileInput"></input>
+            <input type = "digit" class="input_main" placeholder=" "  bindinput= "userMileInput" value = '{{userMile}}'></input>
           </view>
         </view>
         <button class="button_main" hover-class = "button_main_hover" bindtap="btnCommit">提交</button>
