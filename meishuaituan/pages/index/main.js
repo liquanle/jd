@@ -175,7 +175,7 @@ Page({
       success: res => {
         if (res.data === "today_is_exist"){
           wx.showToast({
-            title: this.data.userID + '号成功失败，今天已经打过卡了！',
+            title: this.data.userID + '号打卡失败，今天已经打过卡了！',
             icon: 'none',
             duration: 6000//持续的时间
           });
