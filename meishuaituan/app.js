@@ -34,7 +34,9 @@ App(Object.assign(app,{
                 prevPage.setData({
                   userID: res.data,
                   userMile: '',
-                  userIdDisable: res.data ? true : false
+                  userIdDisable: res.data ? true : false,
+                  userIDfocus: res.data ? false : true,
+                  userMilefocus: res.data ? true : false
                 })
               }
             })

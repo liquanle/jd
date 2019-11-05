@@ -13,7 +13,9 @@ function json2Form(json) {
 Page({
   data: {
     userID:'',
-    userIdDisable:false,
+    userIdDisable:true,
+    userIDfocus: true,
+    userMilefocus:false,
     userMile:'',
     nickname:'',
     image:{},
@@ -70,7 +72,9 @@ Page({
         this.setData({
           userID: res.data,
           userMile:'',
-          userIdDisable: res.data ? true : false
+          userIdDisable: res.data ? true : false,
+          userIDfocus: res.data ? false : true,
+          userMilefocus: res.data ? true : false
         })
       }
     })
