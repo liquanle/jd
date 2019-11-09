@@ -96,6 +96,15 @@ Page({
     })
   },
 
+  //显示当前的版本号
+  onAppVersion: function(){
+    wx.showToast({
+      title: '当前版本[1.5.2.1]',
+      icon: 'none',
+      duration: 2000
+    })
+  },
+
   //获取用户输入的用户ID
   userIDInput: function (e) {
     this.setData({
@@ -133,7 +142,18 @@ Page({
       this.setData({
         userMile:''
       })
-      return
+      return;
+    }else if (nMile > 150) {
+      wx.showToast({
+        title: '跑太多了不能打卡！',
+        icon: 'none',
+        duration: 2000
+      })
+
+      this.setData({
+        userMile: ''
+      })
+      return;
     }
 
     //增加访问request接口
