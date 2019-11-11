@@ -7,9 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
-
-	"lql.com/tool/file"
 
 	"github.com/bitly/go-simplejson"
 	_ "github.com/mattn/go-sqlite3"
@@ -73,6 +72,23 @@ func daka(w http.ResponseWriter, r *http.Request) {
 
 		//先获取值
 		nickName, userID, openid, image, mile := r.Form.Get("nickname"), r.Form.Get("userID"), r.Form.Get("openid"), r.Form.Get("image"), r.Form.Get("mile")
+		var score int
+		fMile, err := strconv.ParseFloat(mile, 10)
+		if fMile >= 3 && fMile < 5 {
+			score = 2
+		} else if fMile >= 5 && fMile < 10 {
+			score = 3
+		} else if fMile >= 10 && fMile < 15 {
+			score = 4
+		} else if fMile >= 15 && fMile < 21.0975 {
+			score = 5
+		} else if fMile >= 21.0975 && fMile < 30 {
+			score = 7
+		} else if fMile >= 30 && fMile < 42.195 {
+			score = 8
+		} else if fMile >= 42.195 {
+			score = 9
+		}
 
 		//先获取值
 		year, mon, day := time.Now().Date()
@@ -97,14 +113,14 @@ func daka(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//插入数据
-		gStmt, err := gDb.Prepare("INSERT INTO runRec(nickname, userID, openid, mile, time, image) values(?,?,?,?,?,?)")
+		gStmt, err := gDb.Prepare("INSERT INTO runRec(nickname, userID, openid, mile, score, time, image) values(?,?,?,?,?,?,?)")
 		checkErr(err)
 
 		//fmt.Println("gStmt 前")
 		var curTime = time.Now().Format("2006-01-02 15:04:05")
 		// res, err := gStmt.Exec("477", "wxno", "5", curTime)
 
-		_, err = gStmt.Exec(nickName, userID, openid, mile, curTime, image)
+		_, err = gStmt.Exec(nickName, userID, openid, mile, score, curTime, image)
 		checkErr(err)
 
 		fmt.Printf("userid = %s\nnickname = %s\nopenid = %s\nimage = %s\nmile = %s\n", userID, nickName, openid, image, mile)
@@ -141,8 +157,21 @@ func queryMember(w http.ResponseWriter, r *http.Request) {
 			err := rows.Scan(&userIDval)
 			checkErr(err)
 
-			fmt.Println(userIDval)
+			expiration := time.Now()
+			expiration = expiration.AddDate(1, 0, 0)
+
+			//可以使用SetCookie代码set与add,比较方便
+			ckUserID := http.Cookie{
+				Name:    "userID",
+				Value:   userIDval,
+				Expires: expiration,
+			}
+
+			//设置头部必须在设置body之前，否则不起作用
+			http.SetCookie(w, &ckUserID)
 			w.Write([]byte(string(userIDval)))
+
+			fmt.Println(userIDval)
 		}
 
 		gDb.Close()
@@ -214,10 +243,10 @@ func getOpenId(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fmt.Println("service is started, current version:1.1.3, modified date 2019-11-11")
 	//初始化数据库
 	initFun()
 
-	fmt.Println("开始运行！")
 	http.HandleFunc("/daka", daka)               //打卡处理逻辑
 	http.HandleFunc("/getOpenid", getOpenId)     //得到openID
 	http.HandleFunc("/queryMember", queryMember) //通过查询openid得到userID
@@ -233,38 +262,4 @@ func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func initFun() {
-	strRunRec := "CREATE TABLE `runRec` ( " +
-		"`uid` INTEGER PRIMARY KEY AUTOINCREMENT," +
-		"`nickname` VARCHAR(64) NULL," +
-		"`userID` VARCHAR(64) NULL," +
-		"`openid` VARCHAR(64) NULL," +
-		"`mile` VARCHAR(64) NULL," +
-		"`time` DATE NULL," +
-		"`image` VARCHAR(256) NULL" +
-		");"
-
-	strMember := "CREATE TABLE `member` ( " +
-		"`uid` INTEGER PRIMARY KEY AUTOINCREMENT," +
-		"`nickname` VARCHAR(64) NULL," +
-		"`userID` VARCHAR(64) NULL," +
-		"`openid` VARCHAR(64) NULL," +
-		"`time` DATE NULL," +
-		"`image` VARCHAR(256) NULL" +
-		");"
-
-	bExist, err := file.PathExists("./run.db")
-	gDb, err := sql.Open("sqlite3", "./run.db")
-
-	if !bExist {
-		_, err = gDb.Exec(strRunRec)
-		checkErr(err)
-
-		_, err = gDb.Exec(strMember)
-		checkErr(err)
-	}
-
-	gDb.Close()
 }
