@@ -3,16 +3,30 @@ let app = require("./sim.js/index.js")
 
 App(Object.assign(app,{
   onLaunch: function () {
-    // 展示本地存储能力
-    // var logs = wx.getStorageSync('logs') || []
-    // logs.unshift(Date.now())
-    // wx.setStorageSync('logs', logs)
-
     // 登录
     wx.login({
       success: res => {
+        //假如本地有userID，下面就不用执行了
+        var localUserID = wx.getStorageSync("userID")
+        if (localUserID != null && localUserID != undefined && localUserID != "") {
+          let pages = getCurrentPages();
+          let prevPage = pages[pages.length - 1];  //上一个页面
+          if (prevPage == null || prevPage == undefined){
+            return;
+          }
+
+          prevPage.setData({
+            userID: localUserID,
+            userMile: '',
+            userIdDisable: true,
+            userIDfocus: false,
+            userMilefocus: true
+          })
+
+          return
+        }
+
         // 发送 res.code 到后台换取 openId, sessionKey, unionId
-     
         var APPID = 'wxa1b1f1fe3051de10'
         var secret = '7b14195be09a4db9a8ab38afd4aa9fd7'
 
@@ -26,11 +40,13 @@ App(Object.assign(app,{
             let pages = getCurrentPages();
             let prevPage = pages[pages.length - 1];  //上一个页面
             console.log("当前页面路由：" + prevPage.route)
+            
             //初始化会员编号
             var strQueryUrL = `https://ziweitec.com/queryMember?openid=${app.globalData.openid}`
             wx.request({
               url: strQueryUrL,
               success: res => {
+                console.log("app.js执行了" + strQueryUrL + "接口")
                 prevPage.setData({
                   userID: res.data,
                   userMile: '',
@@ -38,6 +54,8 @@ App(Object.assign(app,{
                   userIDfocus: res.data ? false : true,
                   userMilefocus: res.data ? true : false
                 })
+
+                wx.setStorageSync("userID", res.data)
               }
             })
           }

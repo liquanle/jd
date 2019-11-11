@@ -60,6 +60,21 @@ Page({
     } 
   },
   onShow: function () {
+    //假如本地有userID，下面就不用执行了
+    var localUserID = wx.getStorageSync("userID")
+    if (localUserID != null && localUserID != undefined && localUserID != "") {
+      this.setData({
+        userID: localUserID,
+        userMile: '',
+        userIdDisable: true,
+        userIDfocus: false,
+        userMilefocus:true
+      })
+
+      console.log("读取localUserID成功" + localUserID)
+      return
+    }
+
     //初始化会员编号
     if (app.globalData.openid == ""){
       return;
@@ -76,6 +91,8 @@ Page({
           userIDfocus: res.data ? false : true,
           userMilefocus: res.data ? true : false
         })
+        console.log("main.js执行了" + strQueryUrL + "接口")
+        wx.setStorageSync("userID", res.data)
       }
     })
   },
