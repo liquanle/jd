@@ -1,6 +1,6 @@
-// sxjgpost project doc.go
+// sxpost2 project doc.go
 
 /*
-sxjgpost document
+sxpost2 document
 */
 package main

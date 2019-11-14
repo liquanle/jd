@@ -4,6 +4,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strconv"
+
+	"github.com/bitly/go-simplejson"
 )
 
 type chnItem struct {
@@ -41,20 +45,45 @@ type jgItem struct {
 }
 
 func main() {
-	jsonfmt := `{"flag":"1", "data":{"dev":{"id":"192828","deviceVersion":"V2.1","freq1":"1440","freq2":"1440","connectFreq":"1440","softVersion":"V2.04","energy":"100","signal":"51","tem":"9","clockStatus":"0","save_con":"13","read_con":"11","IO1_Status":"1","IO2_Status":"0"},"datas":[{"channel":"3","value":"0","time":"20191111171903","status":"0"},{"channel":"4","value":"0","time":"20191111171903","status":"0"}]}}`
+	jsonfmt := `{"flag":1, "data":{"dev":{"id":"1904230004","deviceVersion":"V2.1","freq1":"1440","freq2":"1440","connectFreq":"1440","softVersion":"V2.04","energy":"100","signal":"51","tem":"9","clockStatus":"0","save_con":"13","read_con":"11","IO1_Status":"1","IO2_Status":"0"},"datas":[{"channel":"3","value":86,"time":"20191111171903","status":"0"},{"channel":"4","value":35,"time":"20191111171903","status":"0"}]}}`
 	fmt.Println(jsonfmt)
 	bytes := []byte(jsonfmt)
 
-	//1.Unmarshal的第一个参数是json字符串，第二个参数是接受json解析的数据结构。
-	//第二个参数必须是指针，否则无法接收解析的数据，如stu仍为空对象StuRead{}
-	//2.可以直接stu:=new(StuRead),此时的stu自身就是指针
-	stu := jgItem{}
-	err := json.Unmarshal(bytes, &stu)
+	jss, err := simplejson.NewJson(bytes)
 
-	//解析失败会报错，如json字符串格式不对，缺"号，缺}等。
-	if err != nil {
-		fmt.Println(err)
+	if err == nil {
+		flag1 := jss.Get("flag").MustInt()
+		fmt.Println("flag:", flag1)
+
+		deviceid := jss.Get("data").Get("dev").Get("id").MustString()
+		fmt.Println("deviceid:", deviceid)
+
+	} else {
+		fmt.Println("解析错误！:")
 	}
 
-	fmt.Println(stu)
+	mapSer, err := jss.Get("data").Get("datas").Array()
+	for _, row := range mapSer {
+		if each_map, ok := row.(map[string]interface{}); ok {
+			fmt.Println(reflect.TypeOf(each_map["channel"]))
+
+			if serN, ok := each_map["channel"].(string); ok {
+				fmt.Println("channel:", serN)
+			}
+
+			fmt.Println(reflect.TypeOf(each_map["value"]))
+			if number, ok := each_map["value"].(json.Number); ok {
+
+				value, error := strconv.ParseInt(string(number), 10, 0)
+
+				if error == nil {
+					fmt.Println("value:", value)
+				} else {
+					fmt.Println(error)
+				}
+			}
+
+		}
+
+	}
 }

@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -25,6 +27,9 @@ import (
 // type resOpenIDslice struct {
 // 	resOpenIDs []resOpenID
 // }
+
+//全局变量
+var coder = base64.NewEncoding("LQL163GOODLUCKOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_")
 
 //从打卡记录中同步提取会员注册信息
 func addMember(db *sql.DB, userid, oid string) {
@@ -181,6 +186,79 @@ func queryMember(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//得到要查询的所有的打卡记录
+func queryRunRecord(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		fmt.Println("queryRunRecord")
+		r.ParseForm() //解析参数，默认是不会解析的
+
+		gDb, err := sql.Open("sqlite3", "./run.db")
+		checkErr(err)
+
+		var curTIme = time.Now().Format("2006-01-02 15:04:05")
+
+		fmt.Printf("\n———————queryrunrec%s—————————\n", curTIme)
+		//查询数据
+		openid := r.Form.Get("openid")
+		fmt.Println("openid = ", openid)
+		strQueryWhere := fmt.Sprintf("SELECT userID, openid, mile, score, time FROM runRec where openid = '%s'", openid)
+		fmt.Println("strQueryWhere = ", strQueryWhere)
+		rows, err := gDb.Query(strQueryWhere)
+		checkErr(err)
+
+		var runRecs []runRecord
+		for rows.Next() {
+			var rr runRecord
+			var tv time.Time
+
+			err := rows.Scan(&rr.UserID, &rr.Openid, &rr.Mile, &rr.Score, &tv)
+			rr.Time = tv.Format("2006-01-02 15:04:05")
+			checkErr(err)
+
+			fmt.Printf("userID = %s mile = %.1f score = %d time = %s\n", rr.UserID, rr.Mile, rr.Score, rr.Time)
+			fmt.Println("time : ", rr.Time)
+
+			//添加到数组中
+			runRecs = append(runRecs, rr)
+			fmt.Println()
+		}
+		rows.Close()
+
+		data, err := json.Marshal(runRecs)
+		if err != nil {
+			panic(err)
+		}
+
+		//获取记录条数
+		nRCount := len(runRecs)
+		ckstr := strconv.Itoa(nRCount)
+
+		expiration := time.Now()
+		expiration = expiration.AddDate(1, 0, 0)
+
+		//可以使用SetCookie代码set与add,比较方便
+		ckrr := http.Cookie{
+			Name:    "rrCount",
+			Value:   ckstr,
+			Expires: expiration,
+		}
+
+		//设置头部必须在设置body之前，否则不起作用
+		http.SetCookie(w, &ckrr)
+		fmt.Println(runRecs)
+
+		byteRet := []byte(data)
+
+		w.Write(byteRet)
+		w.WriteHeader(200)
+
+		gDb.Close()
+	} else {
+		fmt.Println("post请求，返回")
+		return
+	}
+}
+
 func login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method) //获取请求的方法
 	r.ParseForm()                    //解析参数，默认是不会解析的
@@ -247,9 +325,10 @@ func main() {
 	//初始化数据库
 	initFun()
 
-	http.HandleFunc("/daka", daka)               //打卡处理逻辑
-	http.HandleFunc("/getOpenid", getOpenId)     //得到openID
-	http.HandleFunc("/queryMember", queryMember) //通过查询openid得到userID
+	http.HandleFunc("/daka", daka)                  //打卡处理逻辑
+	http.HandleFunc("/getOpenid", getOpenId)        //得到openID
+	http.HandleFunc("/queryMember", queryMember)    //通过查询openid得到userID
+	http.HandleFunc("/queryRunRec", queryRunRecord) //通过查询openid得到userID
 
 	//err := http.ListenAndServe(":8080", nil)
 	err := http.ListenAndServeTLS(":443", "2988657_ziweitec.com.pem", "2988657_ziweitec.com.key", nil)

@@ -1,0 +1,27 @@
+.runrec{
+  align-items:center;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.runItemID{
+  padding:5rpx 30rpx;
+  margin: 5rpx 5rpx;
+  width: 20%;
+  text-align:left;
+}
+
+.runItemMile{
+  width: 20%;
+  padding:5rpx 10rpx;
+  margin: 5rpx 5rpx;
+  text-align: center;
+}
+
+.runItemTime{
+  width: 60%;
+  padding:5rpx 10rpx;
+  margin: 5rpx 5rpx;
+  text-align: center;
+}

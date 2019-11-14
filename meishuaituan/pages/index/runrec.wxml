@@ -1,0 +1,8 @@
+<!--pages/index/runrec.wxml-->
+<view class="weui-cells">
+  <view class="runrec"  wx:for="{{rrdatas}}" wx:key="id">
+    <view class="runItemID">{{item.UserID}}</view>
+    <view class="runItemMile">{{item.Mile}}</view>
+    <view class="runItemTime">{{item.Time}}</view>
+  </view>
+</view>
